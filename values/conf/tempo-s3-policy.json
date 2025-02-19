@@ -2,7 +2,7 @@
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "LokiStorage",
+            "Sid": "TempoStorage",
             "Effect": "Allow",
             "Action": [
                 "s3:ListBucket",
@@ -11,10 +11,8 @@
                 "s3:DeleteObject"
             ],
             "Resource": [
-                "arn:aws:s3:::loki-chk-67",
-                "arn:aws:s3:::loki-chk-67/*",
-                "arn:aws:s3:::loki-rul-67",
-                "arn:aws:s3:::loki-rul-67/*"
+                "arn:aws:s3:::tempo-bucket-67",
+                "arn:aws:s3:::tempo-bucket-67/*"
             ]
         }
     ]

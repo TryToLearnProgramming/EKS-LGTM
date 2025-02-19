@@ -1,0 +1,45 @@
+serviceAccount:
+  create: true
+  name: tempo
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::686255956392:role/TempoServiceAccountRole"
+
+storage:
+  trace:
+    backend: s3
+    s3:
+      bucket: tempo-bucket-67  # Replace with your S3 bucket name
+      endpoint: s3.amazonaws.com
+      region: us-east-1       # Replace with your AWS region
+      insecure: false
+      # No access/secret keys needed as we're using IAM roles
+
+tempo:
+  structuredConfig:
+    storage:
+      trace:
+        backend: s3
+        s3:
+          bucket: tempo-bucket-67  # Replace with your S3 bucket name
+          endpoint: s3.amazonaws.com
+          region: us-east-1       # Replace with your AWS region
+          insecure: false
+
+# Basic configurations for components
+ingester:
+  replicas: 3
+
+distributor:
+  replicas: 2
+
+compactor:
+  replicas: 1
+
+querier:
+  replicas: 2
+
+queryFrontend:
+  replicas: 2
+
+memcached:
+  enabled: true

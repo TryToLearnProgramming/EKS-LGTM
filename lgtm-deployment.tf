@@ -187,3 +187,90 @@ resource "helm_release" "promtail" {
   
   
 }
+
+########################################################################
+# Tempo Stack
+########################################################################
+
+resource "helm_release" "tempo" {
+  name             = "tempo"
+  repository       = "https://grafana.github.io/helm-charts"
+  chart            = "tempo-distributed"
+  namespace        = "monitoring"
+  create_namespace = true
+
+  values = [templatefile("values/testings/tempo-dist-v1.yaml", {service_account_role_arn=aws_iam_role.tempo_role.arn, tempo_bucket_name=var.tempo_bucket_name})]
+}
+
+
+# ########################################################################
+# # Tempo S3 Buckets
+# ########################################################################
+
+resource "aws_s3_bucket" "tempo_bucket" {
+  bucket = var.tempo_bucket_name
+
+  tags = {
+    Name        = var.tempo_bucket_name
+    Environment = var.environment
+    ManagedBy   = "terraform"
+  }
+}
+
+########################################################################
+# IAM Role for Tempo
+########################################################################
+
+resource "aws_iam_role_policy" "tempo_policy" {
+  name = "${local.name}-tempo-s3-policy"
+  role = aws_iam_role.tempo_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket",
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:GetObjectTagging",
+          "s3:PutObjectTagging"
+        ]
+        Resource = [
+          aws_s3_bucket.tempo_bucket.arn,
+          "${aws_s3_bucket.tempo_bucket.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "tempo_role" {
+  name = "${local.name}-tempo-service-account-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Effect = "Allow"
+        Principal = {
+          Federated = module.eks.oidc_provider_arn
+        }
+        Condition = {
+          StringEquals = {
+            "${module.eks.oidc_provider}:aud" : "sts.amazonaws.com",
+            "${module.eks.oidc_provider}:sub" : "system:serviceaccount:${kubernetes_namespace.monitoring.metadata[0].name}:tempo"
+          }
+        }
+      }
+    ]
+  })
+
+  tags = {
+    Environment = var.environment
+    ManagedBy   = "terraform"
+  }
+}

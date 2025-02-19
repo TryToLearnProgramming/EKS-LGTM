@@ -9,7 +9,7 @@
             "Action": "sts:AssumeRoleWithWebIdentity",
             "Condition": {
                 "StringEquals": {
-                    "oidc.eks.us-east-1.amazonaws.com/id/EDE64A9433E54965145E4289407B7F38:sub": "system:serviceaccount:loki:loki",
+                    "oidc.eks.us-east-1.amazonaws.com/id/EDE64A9433E54965145E4289407B7F38:sub": "system:serviceaccount:monitoring:tempo",
                     "oidc.eks.us-east-1.amazonaws.com/id/EDE64A9433E54965145E4289407B7F38:aud": "sts.amazonaws.com"
                 }
             }

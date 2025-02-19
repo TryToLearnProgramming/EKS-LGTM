@@ -47,6 +47,12 @@ variable "loki_ruler_bucket_name" {
   default     = "loki-rul-6790"
 }
 
+variable "tempo_bucket_name" {
+  description = "Name of the S3 bucket for Tempo"
+  type        = string
+  default     = "tempo-bucket-6790"
+}
+
 variable "loki_basic_auth_htpasswd" {
   description = "htpasswd content for Loki basic auth"
   type        = string
