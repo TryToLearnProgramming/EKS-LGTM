@@ -45,11 +45,11 @@ datasources:
         url: http://loki-gateway.monitoring.svc.cluster.local/
         access: proxy
         isDefault: false
-      # - name: Tempo
-      #   type: tempo
-      #   url: http://tempo-query-frontend.monitoring.svc.cluster.local:3100
-      #   access: proxy
-      #   isDefault: false
+      - name: Tempo
+        type: tempo
+        url: http://tempo-query-frontend.monitoring.svc.cluster.local:3100
+        access: proxy
+        isDefault: false
       # - name: Mimir
       #   type: prometheus
       #   url: http://mimir-tempo-query-frontend-discovery.monitoring.svc.cluster.local/prometheus
