@@ -17,6 +17,6 @@ aws iam delete-policy --policy-arn arn:aws:iam::686255956392:policy/TempoS3Acces
 
 aws s3 rb s3://tempo-bucket-67 --region us-east-1;
 
-# Helm Chart
+# Helm Chart (corrosponding values file present in values/conf/stable-values)
 
 helm install tempo grafana/tempo-distributed -f tempo-dist-v1.yaml -n monitoring

@@ -19,7 +19,7 @@ aws s3 rb s3://loki-chk-67 --region us-east-1; aws s3 rb s3://loki-rul-67 --regi
 
 
 
-# Helm Chart
+# Helm Chart (corrosponding values file present in values/conf/stable-values)
 
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
