@@ -1,0 +1,62 @@
+nameOverride: grafana
+fullnameOverride: grafana
+# namespace: monitoring
+
+adminUsername: admin
+adminPassword: admin
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClassName: gp3
+  accessModes:
+    - ReadWriteOnce
+  annotations: {}
+
+# Add update strategy to ensure proper pod replacement
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 1
+
+# Add pod management policy
+# podManagementPolicy: OrderedReady
+
+# Add termination grace period
+terminationGracePeriodSeconds: 30
+
+# ingress:
+#   enabled: true
+#   annotations:
+#     kubernetes.io/ingress.class: nginx
+#     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+#   ingressClassName: nginx
+#   hosts:
+#     - gra-lgtm.showyrskills.in
+#   paths:
+#     - path: /
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Loki
+        type: loki
+        url: http://loki-gateway.monitoring.svc.cluster.local/
+        access: proxy
+        isDefault: false
+      # - name: Tempo
+      #   type: tempo
+      #   url: http://tempo-query-frontend.monitoring.svc.cluster.local:3100
+      #   access: proxy
+      #   isDefault: false
+      # - name: Mimir
+      #   type: prometheus
+      #   url: http://mimir-tempo-query-frontend-discovery.monitoring.svc.cluster.local/prometheus
+      #   access: proxy
+      #   isDefault: false 
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus-kube-prometheus-prometheus.monitoring.svc:9090
+        access: proxy
+        isDefault: true

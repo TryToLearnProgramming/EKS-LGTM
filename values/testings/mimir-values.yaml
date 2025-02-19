@@ -1,0 +1,91 @@
+mimir:
+  enabled: true
+
+  prometheus:
+    enabled: false
+
+  storage:
+    memory:
+      enabled: false
+    local:
+      enabled: false  # Disable local storage
+    objectStorage:
+      enabled: true   # Enable object storage
+      backend: s3     # Use S3 compatible storage
+      bucket: mimir-data
+      endpoint: mimir-minio:9000  # Point to MinIO service
+      access_key_id: minioadmin   # Default MinIO access key
+      secret_access_key: minioadmin # Default MinIO secret key
+      insecure: true
+
+  minio:
+    enabled: true     # Enable MinIO deployment
+    persistence:
+      enabled: true
+      size: 5Gi
+      storageClass: gp3
+    resources:
+      requests:
+        memory: 512Mi
+        cpu: 250m
+      limits:
+        memory: 1Gi
+        cpu: 500m
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 1
+      memory: 2Gi
+
+  service:
+    type: ClusterIP
+    port: 9009
+
+  ruler:
+    enabled: true
+
+  tracing:
+    enabled: false
+
+  alertmanager:
+    enabled: true
+
+  # Add readiness probe configuration
+  readinessProbe:
+    initialDelaySeconds: 45
+    timeoutSeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    failureThreshold: 3
+
+  # Add liveness probe configuration
+  livenessProbe:
+    initialDelaySeconds: 45
+    timeoutSeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    failureThreshold: 3
+
+  # Add hook configurations
+  hooks:
+    timeoutSeconds: 300
+    minio:
+      resources:
+        requests:
+          memory: 128Mi
+          cpu: 100m
+        limits:
+          memory: 256Mi
+          cpu: 200m
+
+  # Add update strategy
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+
+  # Add pod management policy
+  podManagementPolicy: OrderedReady

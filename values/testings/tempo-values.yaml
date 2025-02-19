@@ -1,0 +1,38 @@
+tempo:
+  enabled: true
+
+  prometheus:
+
+    enabled: false 
+
+  storage:
+
+    memory:
+      enabled: false
+      maxTracesInMemory: 10000
+
+    local:
+      enabled: true
+      path: /tmp/tempo
+
+    objectStorage:
+      enabled: false
+      bucket: tempo-traces
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+  ingester:
+    maxTraceBytes: 512000 # 512KB
+
+  service:
+    type: ClusterIP 
+    port: 3100
+
+  tracing:
+    enabled: false
