@@ -47,7 +47,7 @@ datasources:
         isDefault: false
       - name: Tempo
         type: tempo
-        url: http://tempo-query-frontend.monitoring.svc.cluster.local:3100
+        url: http://grafana-tempo:3100
         access: proxy
         isDefault: false
       # - name: Mimir
