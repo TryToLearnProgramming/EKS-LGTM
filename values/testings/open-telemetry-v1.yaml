@@ -1,0 +1,20 @@
+mode: "deployment"
+
+config:
+  exporters:
+    otlp:
+      endpoint: grafana-tempo:4317
+      tls:
+        insecure: true  # Since we're in cluster communication
+  service:
+    pipelines:
+      traces:
+        receivers: [otlp]
+        processors: [batch]
+        exporters: [debug, otlp]
+
+image:
+  repository: otel/opentelemetry-collector-contrib
+  tag: "latest"
+command:
+  name: otelcol-contrib

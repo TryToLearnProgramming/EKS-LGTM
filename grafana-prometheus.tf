@@ -1,18 +1,18 @@
-resource "helm_release" "prometheus" {
+# resource "helm_release" "prometheus" {
 
-  name             = "prometheus"
-  repository       = "https://charts.bitnami.com/bitnami"
-  chart            = "kube-prometheus"
-  version          = "8.22.3"
-  timeout          = 300
-  create_namespace = true
-  namespace        = "monitoring"
+#   name             = "prometheus"
+#   repository       = "https://charts.bitnami.com/bitnami"
+#   chart            = "kube-prometheus"
+#   version          = "8.22.3"
+#   timeout          = 300
+#   create_namespace = true
+#   namespace        = "monitoring"
 
-  depends_on = [
-    module.eks,
-    module.vpc
-  ]
-}
+#   depends_on = [
+#     module.eks,
+#     module.vpc
+#   ]
+# }
 
 # resource "helm_release" "grafana" {
 #   name             = "grafana"

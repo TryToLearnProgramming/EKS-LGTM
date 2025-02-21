@@ -63,24 +63,24 @@ resource "kubernetes_secret" "canary_basic_auth" {
 }
 
 # deploy loki
-resource "helm_release" "loki" {
-  name             = "loki"
-  repository       = "https://grafana.github.io/helm-charts"
-  chart            = "loki"
-  namespace        = "monitoring"
-  create_namespace = true
+# resource "helm_release" "loki" {
+#   name             = "loki"
+#   repository       = "https://grafana.github.io/helm-charts"
+#   chart            = "loki"
+#   namespace        = "monitoring"
+#   create_namespace = true
 
-  values = [templatefile("values/testings/loki-values.yaml", {service_account_role_arn=aws_iam_role.loki_role.arn, loki_bucket_name=var.loki_bucket_name, loki_ruler_bucket_name=var.loki_ruler_bucket_name})]
+#   values = [templatefile("values/testings/loki-values.yaml", {service_account_role_arn=aws_iam_role.loki_role.arn, loki_bucket_name=var.loki_bucket_name, loki_ruler_bucket_name=var.loki_ruler_bucket_name})]
 
-  depends_on = [
-    module.eks,
-    module.eks_blueprints_addons,
-    module.vpc,
-    kubernetes_namespace.monitoring,
-    kubernetes_secret.canary_basic_auth,
-    helm_release.promtail
-  ]
-}
+#   depends_on = [
+#     module.eks,
+#     module.eks_blueprints_addons,
+#     module.vpc,
+#     kubernetes_namespace.monitoring,
+#     kubernetes_secret.canary_basic_auth,
+#     helm_release.promtail
+#   ]
+# }
 
 # ########################################################################
 # # Loki S3 Buckets
@@ -176,32 +176,42 @@ resource "aws_iam_role" "loki_role" {
 # Promtail Stack
 ########################################################################
 
-resource "helm_release" "promtail" {
-  name             = "promtail"
-  repository       = "https://grafana.github.io/helm-charts"
-  chart            = "promtail"
-  namespace        = "monitoring"
-  create_namespace = true
+# resource "helm_release" "promtail" {
+#   name             = "promtail"
+#   repository       = "https://grafana.github.io/helm-charts"
+#   chart            = "promtail"
+#   namespace        = "monitoring"
+#   create_namespace = true
 
-  values = [templatefile("values/testings/promtail-values.yml", {mock="mock"})]
+#   values = [templatefile("values/testings/promtail-values.yml", {mock="mock"})]
   
   
-}
+# }
 
 ########################################################################
 # Tempo Stack
 ########################################################################
 
-resource "helm_release" "tempo" {
-  name             = "tempo"
+# resource "helm_release" "tempo" {
+#   name             = "tempo"
+#   repository       = "https://grafana.github.io/helm-charts"
+#   chart            = "tempo-distributed"
+#   namespace        = "monitoring"
+#   create_namespace = true
+
+#   values = [templatefile("values/testings/tempo-dist-v1.yaml", {service_account_role_arn=aws_iam_role.tempo_role.arn, tempo_bucket_name=var.tempo_bucket_name})]
+# }
+
+
+resource "helm_release" "grafana-tempo" {
+  name             = "grafana-tempo"
   repository       = "https://grafana.github.io/helm-charts"
-  chart            = "tempo-distributed"
+  chart            = "tempo"
   namespace        = "monitoring"
   create_namespace = true
 
-  values = [templatefile("values/testings/tempo-dist-v1.yaml", {service_account_role_arn=aws_iam_role.tempo_role.arn, tempo_bucket_name=var.tempo_bucket_name})]
+  values = [templatefile("values/testings/tempo-values.yaml", {service_account_role_arn=aws_iam_role.tempo_role.arn, tempo_bucket_name=var.tempo_bucket_name})]
 }
-
 
 # ########################################################################
 # # Tempo S3 Buckets
@@ -273,4 +283,18 @@ resource "aws_iam_role" "tempo_role" {
     Environment = var.environment
     ManagedBy   = "terraform"
   }
+}
+
+########################################################################
+# Open Telemetry
+########################################################################
+
+resource "helm_release" "open-telemetry" {
+  name             = "opentelemetry-collector"
+  repository       = "https://open-telemetry.github.io/opentelemetry-helm-charts"
+  chart            = "opentelemetry-collector"
+  namespace        = "monitoring"
+  create_namespace = true
+
+  values = [templatefile("values/testings/open-telemetry-v1.yaml", {mock="mock"})]
 }
