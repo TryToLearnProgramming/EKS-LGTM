@@ -18,8 +18,8 @@ module "eks" {
 
   eks_managed_node_groups = {
     statefulset = {
-      desired_size = 3
-      min_size     = 3
+      desired_size = 4
+      min_size     = 4
       max_size     = 10
 
       labels = {

@@ -10,6 +10,31 @@ resource "null_resource" "update_kubeconfig" {
 }
 
 ########################################################################
+# Create Storage Class
+########################################################################
+resource "kubernetes_storage_class" "gp3" {
+  metadata {
+    name = "gp3"
+  }
+
+  storage_provisioner = "ebs.csi.aws.com"
+  reclaim_policy     = "Delete"
+  parameters = {
+    type      = "gp3"
+    encrypted = "true"
+    fsType    = "ext4"
+  }
+  volume_binding_mode            = "WaitForFirstConsumer"
+  allow_volume_expansion        = true
+
+  depends_on = [
+    module.eks,
+    module.eks_blueprints_addons,
+    null_resource.update_kubeconfig
+  ]
+}
+
+########################################################################
 # Create Monitoring Namespace
 ########################################################################
 
@@ -42,6 +67,7 @@ resource "helm_release" "grafana-stack" {
   depends_on = [
     module.eks,
     module.eks_blueprints_addons,
+    kubernetes_namespace.monitoring
   ]
 }
 
@@ -60,6 +86,10 @@ resource "kubernetes_secret" "canary_basic_auth" {
     username = "loki"
     password = "password123"
   }
+
+  depends_on = [
+    kubernetes_namespace.monitoring
+  ]
 }
 
 # deploy loki
@@ -185,7 +215,10 @@ resource "helm_release" "promtail" {
 
   values = [templatefile("values/testings/promtail-values.yml", {mock="mock"})]
   
-  
+  depends_on = [
+    kubernetes_namespace.monitoring,
+    kubernetes_secret.canary_basic_auth,
+  ]
 }
 
 ########################################################################
@@ -211,6 +244,9 @@ resource "helm_release" "grafana-tempo" {
   create_namespace = true
 
   values = [templatefile("values/testings/tempo-values.yaml", {service_account_role_arn=aws_iam_role.tempo_role.arn, tempo_bucket_name=var.tempo_bucket_name})]
+  depends_on = [
+    kubernetes_namespace.monitoring
+  ]
 }
 
 # ########################################################################
@@ -297,4 +333,8 @@ resource "helm_release" "open-telemetry" {
   create_namespace = true
 
   values = [templatefile("values/testings/open-telemetry-v1.yaml", {mock="mock"})]
+
+  depends_on = [
+    kubernetes_namespace.monitoring
+  ]
 }
