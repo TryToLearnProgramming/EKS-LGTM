@@ -53,6 +53,18 @@ variable "tempo_bucket_name" {
   default     = "tempo-bucket-6790"
 }
 
+variable "mimir_blocks_bucket_name" {
+  description = "Name of the S3 bucket for Mimir blocks"
+  type        = string
+  default     = "mimir-blocks-6790"
+}
+
+variable "mimir_ruler_bucket_name" {
+  description = "Name of the S3 bucket for Mimir ruler"
+  type        = string
+  default     = "mimir-ruler-6790"
+}
+
 variable "loki_basic_auth_htpasswd" {
   description = "htpasswd content for Loki basic auth"
   type        = string

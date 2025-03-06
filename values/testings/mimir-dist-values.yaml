@@ -1,0 +1,91 @@
+query_scheduler:
+  replicas: 1 # Modify Number of replicas if you want, The default number of replicas for the query_scheduler is 2
+querier:
+  replicas: 1 # Modify Number of replicas if you want, The default number of replicas for the querier is 2
+  # Add resource requests/limits to prevent OOM issues
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+  # Remove persistent volume for querier as it doesn't typically need one
+  persistentVolume:
+    enabled: false
+alertmanager:
+  enabled: true  # This should match your intent - if you're not using alertmanager, set to false
+  replicas: 1 
+  persistentVolume:
+    enabled: false
+    storageClass: gp3
+    size: 10Gi
+ingester:
+  replicas: 1 # Minimizing ingester pods to 1
+  zoneAwareReplication: # zone-aware replication is the replication of data across failure domains, Enable it if you want to use it, https://grafana.com/docs/mimir/latest/configure/configure-zone-aware-replication/
+    enabled: false 
+  persistentVolume:
+    enabled: false
+    storageClass: gp3
+    size: 10Gi
+store_gateway:
+  replicas: 1 # Minimizing store_gateway pods to 1
+  zoneAwareReplication: # zone-aware replication is the replication of data across failure domains, Enable it if you want to use it, https://grafana.com/docs/mimir/latest/configure/configure-zone-aware-replication/
+    enabled: false
+  persistentVolume:
+    enabled: false
+    storageClass: gp3
+    size: 10Gi
+compactor:
+  replicas: 1 # Minimizing compactor pods to 1
+  persistentVolume:
+    enabled: false
+    storageClass: gp3
+    size: 10Gi
+ruler:
+  replicas: 1
+  persistentVolume:
+    enabled: false
+    storageClass: gp3
+    size: 10Gi
+query_frontend:
+  replicas: 1
+  # Query frontend doesn't need persistent storage
+  persistentVolume:
+    enabled: false
+minio:
+  enabled: false # Mimir helm chart deploys minio by default, if you prefer to use your own mimio instance, disable it as i did
+
+global:
+  # Create service account with proper AWS role annotation
+  serviceAccount:
+    create: true
+    name: mimir-sa
+    annotations:
+      eks.amazonaws.com/role-arn: "${service_account_role_arn}"
+
+# Fix the storage configuration with explicit access settings
+mimir:
+  structuredConfig:
+    common:
+      storage:
+        backend: s3
+        s3:
+          bucket_name: ${mimir_ruler_bucket_name}
+          endpoint: s3.amazonaws.com
+          region: us-east-1
+          access_key_id: ""  # Leave empty to use IAM role
+          secret_access_key: ""  # Leave empty to use IAM role
+          insecure: false
+    blocks_storage:
+      backend: s3  # Explicitly set backend
+      s3:
+        bucket_name: ${mimir_blocks_bucket_name}
+    alertmanager_storage:
+      backend: s3  # Explicitly set backend
+      s3:
+        bucket_name: ${mimir_ruler_bucket_name}
+    ruler_storage:
+      backend: s3  # Explicitly set backend
+      s3:
+        bucket_name: ${mimir_ruler_bucket_name}
+      

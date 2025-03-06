@@ -1,0 +1,32 @@
+distributor:
+  receivers:
+    otlp:
+
+ingester:
+  trace_idle_period: 10s  
+  max_block_bytes: 1_000_000  
+  max_block_duration: 1m  
+
+compactor:
+  compaction:
+    compaction_window: 1h             
+    max_compaction_objects: 1000000   
+    block_retention: 1h
+    compacted_block_retention: 10m
+    flush_size_bytes: 5242880 
+
+serviceAccount:
+  create: true
+  name: tempo
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::686255956392:role/TempoServiceAccountRole"
+
+storage:
+  trace:
+    backend: s3
+    s3:
+      bucket: tempo-bucket-67  # Replace with your S3 bucket name
+      endpoint: s3.amazonaws.com
+      region: us-east-1       # Replace with your AWS region
+      insecure: false
+      # No access/secret keys needed as we're using IAM roles

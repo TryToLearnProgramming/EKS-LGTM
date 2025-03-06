@@ -338,3 +338,105 @@ resource "helm_release" "open-telemetry" {
     kubernetes_namespace.monitoring
   ]
 }
+
+########################################################################
+# Mimir Stack
+########################################################################
+
+resource "helm_release" "mimir" {
+  name             = "mimir"
+  repository       = "https://grafana.github.io/helm-charts"
+  chart            = "mimir-distributed"
+  namespace        = "monitoring"
+  create_namespace = true
+
+  values = [templatefile("values/testings/mimir-dist-values.yaml", {service_account_role_arn=aws_iam_role.mimir_role.arn, mimir_blocks_bucket_name=var.mimir_blocks_bucket_name, mimir_ruler_bucket_name=var.mimir_ruler_bucket_name})]
+
+  depends_on = [
+    kubernetes_namespace.monitoring
+  ]
+}
+
+########################################################################
+# Mimir S3 Buckets
+########################################################################
+
+resource "aws_s3_bucket" "mimir_blocks_bucket" {
+  bucket = var.mimir_blocks_bucket_name
+
+  tags = {
+    Name        = var.mimir_blocks_bucket_name
+    Environment = var.environment
+    ManagedBy   = "terraform"
+  }
+}
+
+resource "aws_s3_bucket" "mimir_ruler_bucket" {
+  bucket = var.mimir_ruler_bucket_name
+
+  tags = {
+    Name        = var.mimir_ruler_bucket_name
+    Environment = var.environment
+    ManagedBy   = "terraform"
+  }
+}
+
+########################################################################
+# IAM Role for Mimir
+########################################################################
+
+resource "aws_iam_role_policy" "mimir_policy" {
+  name = "${local.name}-mimir-s3-policy"
+  role = aws_iam_role.mimir_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket",
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:GetObjectTagging",
+          "s3:PutObjectTagging"
+        ]
+        Resource = [
+          aws_s3_bucket.mimir_blocks_bucket.arn,
+          "${aws_s3_bucket.mimir_blocks_bucket.arn}/*",
+          aws_s3_bucket.mimir_ruler_bucket.arn,
+          "${aws_s3_bucket.mimir_ruler_bucket.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "mimir_role" {
+  name = "${local.name}-mimir-service-account-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Effect = "Allow"
+        Principal = {
+          Federated = module.eks.oidc_provider_arn
+        }
+        Condition = {
+          StringEquals = {
+            "${module.eks.oidc_provider}:aud" : "sts.amazonaws.com",
+            "${module.eks.oidc_provider}:sub" : "system:serviceaccount:${kubernetes_namespace.monitoring.metadata[0].name}:mimir"
+          }
+        }
+      }
+    ]
+  })
+
+  tags = {
+    Environment = var.environment
+    ManagedBy   = "terraform"
+  }
+}
