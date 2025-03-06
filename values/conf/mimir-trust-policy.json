@@ -1,0 +1,18 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Federated": "arn:aws:iam::686255956392:oidc-provider/oidc.eks.us-east-1.amazonaws.com/id/6E28F07E7F101A48F8B4E0A0479B8755"
+            },
+            "Action": "sts:AssumeRoleWithWebIdentity",
+            "Condition": {
+                "StringEquals": {
+                    "oidc.eks.us-east-1.amazonaws.com/id/6E28F07E7F101A48F8B4E0A0479B8755:sub": "system:serviceaccount:monitoring:mimir",
+                    "oidc.eks.us-east-1.amazonaws.com/id/6E28F07E7F101A48F8B4E0A0479B8755:aud": "sts.amazonaws.com"
+                }
+            }
+        }
+    ]
+}
