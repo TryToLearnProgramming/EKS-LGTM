@@ -50,11 +50,11 @@ datasources:
         url: http://grafana-tempo:3100
         access: proxy
         isDefault: false
-      # - name: Mimir
-      #   type: prometheus
-      #   url: http://mimir-tempo-query-frontend-discovery.monitoring.svc.cluster.local/prometheus
-      #   access: proxy
-      #   isDefault: false 
+      - name: Mimir
+        type: prometheus
+        url: http://mimir-nginx.monitoring.svc.cluster.local/prometheus
+        access: proxy
+        isDefault: false 
       - name: Prometheus
         type: prometheus
         url: http://prometheus-kube-prometheus-prometheus.monitoring.svc:9090
