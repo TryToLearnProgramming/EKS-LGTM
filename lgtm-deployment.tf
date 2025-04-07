@@ -6,7 +6,10 @@ resource "null_resource" "update_kubeconfig" {
   provisioner "local-exec" {
     command = "aws eks --region ${var.region} update-kubeconfig --name ${local.name}"
   }
-  depends_on = [module.eks]
+  depends_on = [
+    module.eks, 
+    module.eks_blueprints_addons
+  ]
 }
 
 ########################################################################
@@ -28,8 +31,6 @@ resource "kubernetes_storage_class" "gp3" {
   allow_volume_expansion        = true
 
   depends_on = [
-    module.eks,
-    module.eks_blueprints_addons,
     null_resource.update_kubeconfig
   ]
 }
@@ -65,8 +66,6 @@ resource "helm_release" "grafana-stack" {
   values = [templatefile("values/testings/grafana-values.yaml", {mock="mock"})]
 
   depends_on = [
-    module.eks,
-    module.eks_blueprints_addons,
     kubernetes_namespace.monitoring
   ]
 }
@@ -103,9 +102,6 @@ resource "helm_release" "loki" {
   values = [templatefile("values/testings/loki-values.yaml", {service_account_role_arn=aws_iam_role.loki_role.arn, loki_bucket_name=var.loki_bucket_name, loki_ruler_bucket_name=var.loki_ruler_bucket_name})]
 
   depends_on = [
-    module.eks,
-    module.eks_blueprints_addons,
-    module.vpc,
     kubernetes_namespace.monitoring,
     kubernetes_secret.canary_basic_auth,
     helm_release.promtail

@@ -23,19 +23,19 @@ module "eks_blueprints_addons" {
     }
   }
 
-  enable_aws_load_balancer_controller = true
-  # enable_cluster_autoscaler           = true
+  # enable_aws_load_balancer_controller = true
+  enable_cluster_autoscaler           = true
   enable_karpenter                    = true
   # enable_metrics_server               = true
   # enable_external_dns                 = true
-  enable_cert_manager                 = true
+  # enable_cert_manager                 = true
   enable_aws_cloudwatch_metrics       = false
   enable_aws_for_fluentbit            = false
 
   depends_on = [
     module.eks,
     # time_sleep.wait_for_kubernetes,
-    null_resource.update_kubeconfig,
+    # null_resource.update_kubeconfig,
     module.vpc
   ]
 
