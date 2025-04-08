@@ -436,3 +436,21 @@ resource "aws_iam_role" "mimir_role" {
     ManagedBy   = "terraform"
   }
 }
+
+########################################################################
+# Alloy Stack
+########################################################################
+
+resource "helm_release" "alloy" {
+  name             = "alloy"
+  repository       = "https://grafana.github.io/helm-charts"
+  chart            = "alloy"
+  namespace        = "monitoring"
+
+  values = [file("values/testings/alloy-test1.yaml")]
+
+  depends_on = [
+    kubernetes_namespace.monitoring,
+    helm_release.mimir
+  ]
+}
