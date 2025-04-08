@@ -20,7 +20,7 @@ alertmanager:
     storageClass: gp3
     size: 10Gi
 ingester:
-  replicas: 1 # Minimizing ingester pods to 1
+  replicas: 2  # Increase to at least 2 replicas
   zoneAwareReplication: # zone-aware replication is the replication of data across failure domains, Enable it if you want to use it, https://grafana.com/docs/mimir/latest/configure/configure-zone-aware-replication/
     enabled: false 
   persistentVolume:
@@ -88,4 +88,7 @@ mimir:
       backend: s3  # Explicitly set backend
       s3:
         bucket_name: ${mimir_ruler_bucket_name}
+    ingester:
+      ring:
+        replication_factor: 1
       
